@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AAaaAAAA</title>
+
+  <style>
+    body {
+      background-color: #F0EBE3;
+    }
+    .content {
+      border: 5px;
+      margin: auto;
+      padding: 1em;
+    }
+
+    table {
+      padding: 5px;
+      font-size: 12px;
+      text-align: center;
+      background-color: #F1E5D1;
+      border-bottom: 1px solid;
+    }
+    table th{
+      padding: 5px 0px;
+      border-bottom: 1px solid;
+      border-color: #B7B7B7;
+    }
+    table .row-border-right {
+      border-right: 1px solid;
+      border-color: #B7B7B7;
+    }
+
+    table .divider {
+      border-bottom: 1px solid;
+    }
+
+    .intro {
+      text-align: center;
+      padding: 1vh;
+    }
+      .intro .title {
+        font-size: 24px;
+      }
+      .intro table {
+        width: 50%;
+      }
+
+    .station {
+      text-align: center;
+      padding: 1vh;
+    }
+      .station table {
+        width: 80%;
+      }
+
+    .parameters {
+      text-align: center;
+      padding: 1vh;
+    }
+      .parameters table {
+        width: 80%;
+      }
+
+  </style>
+</head>
+
+<body>
+
+<div class="content">
+
+  <div class="introduction_letter">
+    <p> Hi <strong>{{data.sales_firstname}} {{data.sales_lastname}}</strong>,</p>
+    <p> Here's your weekly report for the station status on <strong>{{data.start_date}}</strong> to <strong>{{data.end_date}}</strong></p>
+  </div>
+
+  <div class="intro">
+    <div class="title">
+      <h3>Weekly ARM Report</h3>
+    </div>
+
+    <table>
+      <tr class="rows">
+        <th>ARM name</th>
+        <th>Online Stations</th>
+        <th>Reliable Parameter Data</th>
+      </tr>
+      {% for arm_data in data.report %}
+        <tr class="rows">
+          <td class="row-border-right"> {{arm_data.arm_name}}</td>
+          <td>{{arm_data.online}}</td>
+          <td>{{arm_data.reliable_data}}</td>
+        </tr>
+      {% endfor %}
+    </table>
+
+  </div>
+
+    <hr/>
+  </div>
+
+
+  <div class="station">
+
+    <div class="title">
+      <h3>Station Status</h3>
+    </div>
+
+    <table>
+      <tr class="rows">
+        <th style="width: 20%">ARM Name</th>
+        <th style="width: 15%">Station Name</th>
+        <th>Latest Data</th>
+        <th>Days Online</th>
+        <th>Date & Time Checked</th>
+      </tr>
+      {% for arm_data in data.report %}
+        {% for station in arm_data.stations %}
+          <tr class="rows">
+            <td> {{arm_data.arm_name}}</td>
+            <td class="row-border-right"> {{station.station_name}} </td>
+            <td>{{station.latest_data}}</td>
+            <td>{{station.days_online}}</td>
+            <td>{{station.date_checked}}</td>
+          </tr>
+        {% endfor %}
+
+        {% if loop.nextitem %}
+          {% if arm_data.arm_name != loop.nextitem.arm_name %}
+            <tr class="divider">
+              <td></td><td class="row-border-right"></td>
+            </tr>
+          {% endif %}
+        {% endif %}
+
+      {% endfor %}
+    </table>
+    <hr/>
+  </div>
+
+  <div class="parameters">
+    <div class="title">
+      <h3>Station Parameters with -9999 value</h3>
+    </div>
+
+    <table>
+      <tr class="rows">
+        <th style="width: 20%">ARM Name</th>
+        <th style="width: 15%">Station Name</th>
+        <th>Parameter Name</th>
+        <th>Date Occurred</th>
+        <th>Date & Time Checked</th>
+      </tr>
+
+      {% for arm_data in data.report %}
+        {% for station in arm_data.stations %}
+          {% for parameter in station.invalid_parameters %}
+            <tr class="rows">
+              <td> {{ arm_data.arm_name }} </td>
+              <td class="row-border-right"> {{ station.station_name }} </td>
+              <td> {{ parameter.parameter_name }} </td>
+              <td> {{ parameter.date_occurred }}</td>
+              <td> {{ parameter.date_checked }} </td>
+            </tr>
+          {% endfor %}
+        {% endfor %}
+
+        {% if loop.nextitem %}
+          {% if arm_data.arm_name != loop.nextitem.arm_name %}
+            <tr class="divider">
+              <td></td><td class="row-border-right"></td>
+            </tr>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+
+    </table>
+  </div>
+  <hr/>
+
+
+</body>
+</html>

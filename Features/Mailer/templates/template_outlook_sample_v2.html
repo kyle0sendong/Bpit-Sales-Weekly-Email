@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>AAaaAAAA</title>
+
+  <style>
+    body {
+      background-color: #F0EBE3;
+    }
+    .content {
+      border: 5px;
+      margin: auto;
+      padding: 1em;
+    }
+
+    table {
+      padding: 5px;
+      font-size: 12px;
+      text-align: center;
+      background-color: #F1E5D1;
+      border-bottom: 1px solid;
+    }
+    table th{
+      padding: 5px 0px;
+      border-bottom: 1px solid;
+      border-color: #B7B7B7;
+    }
+    table .row-border-right {
+      border-right: 1px solid;
+      border-color: #B7B7B7;
+    }
+
+    table .divider {
+      border-bottom: 1px solid;
+    }
+
+    .intro {
+      text-align: center;
+      padding: 1vh;
+    }
+      .intro .title {
+        font-size: 24px;
+      }
+      .intro table {
+        width: 50%;
+        margin: auto;
+      }
+
+    .station {
+      text-align: center;
+      padding: 1vh;
+    }
+      .station table {
+        width: 80%;
+        margin: auto;
+      }
+
+    .parameters {
+      text-align: center;
+      padding: 1vh;
+    }
+      .parameters table {
+        width: 80%;
+      }
+
+  </style>
+</head>
+
+<body>
+
+<div class="content">
+
+  <div class="introduction_letter">
+    <p> Hi [sales name],</p>
+    <p> Here's your weekly report for the station status on [start date] to [end date]</p>
+  </div>
+
+  <div class="intro">
+    <div class="title">
+      <h3>Weekly ARM Report</h3>
+    </div>
+
+    <table>
+      <tr class="rows">
+        <th>ARM name</th>
+        <th>Online Stations</th>
+        <th>Reliable Parameter Data</th>
+      </tr>
+      <tr class="rows">
+        <td class="row-border-right">ARM Test1</td>
+        <td>7/8</td>
+        <td>10/15</td>
+      </tr>
+      <tr class="rows">
+        <td class="row-border-right">ARM Test2</td>
+        <td>8/9</td>
+        <td>10/15</td>
+      </tr>
+    </table>
+
+  </div>
+
+    <hr/>
+  </div>
+
+
+  <div class="station">
+
+    <div class="title">
+      <h3>Station Status</h3>
+    </div>
+
+    <table>
+      <tr class="rows">
+        <th style="width: 20%">ARM Name</th>
+        <th style="width: 15%">Station Name</th>
+        <th>Latest Data</th>
+        <th>Days Online</th>
+        <th>Date & Time Checked</th>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S030T05</td>
+        <td>May 31, 2024</td>
+        <td>7/7</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S031T05</td>
+        <td>May 31, 2024</td>
+        <td>6/7</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S030T05</td>
+        <td>May 31, 2024</td>
+        <td>7/7</td>
+        <td>January 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="divider">
+        <td></td><td class="row-border-right"></td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S031T05</td>
+        <td>May 31, 2024</td>
+        <td>6/7</td>
+        <td>December 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S030T05</td>
+        <td>May 31, 2024</td>
+        <td>7/7</td>
+        <td>October 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S031T05</td>
+        <td>May 31, 2024</td>
+        <td>6/7</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="divider">
+        <td></td><td class="row-border-right"></td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test3</td>
+        <td class="row-border-right">S030T05</td>
+        <td>May 31, 2024</td>
+        <td>7/7</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test3</td>
+        <td class="row-border-right">S031T05</td>
+        <td>May 31, 2024</td>
+        <td>6/7</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+    </table>
+    <hr/>
+  </div>
+
+  <div class="parameters">
+    <div class="title">
+      <h3>Station Parameters with -9999 value</h3>
+    </div>
+    <table>
+      <tr class="rows">
+        <th style="width: 20%">ARM Name</th>
+        <th style="width: 15%">Station Name</th>
+        <th>Parameter Name</th>
+        <th>Date Occurred</th>
+        <th>Date & Time Checked</th>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value2</td>
+        <td>January 24, 2024 9:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value8</td>
+        <td>May 24, 2024 10:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test1</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value12</td>
+        <td>May 24, 2024 12:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="divider">
+        <td></td><td class="row-border-right"></td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value2</td>
+        <td>January 24, 2024 9:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value8</td>
+        <td>May 24, 2024 10:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test2</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value12</td>
+        <td>May 24, 2024 12:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="divider">
+        <td></td><td class="row-border-right"></td>
+      </tr>
+
+      <tr class="rows">
+        <td>ARM Test3</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value2</td>
+        <td>January 24, 2024 9:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test3</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value8</td>
+        <td>May 24, 2024 10:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+      <tr class="rows">
+        <td>ARM Test3</td>
+        <td class="row-border-right">S030T60</td>
+        <td>Value12</td>
+        <td>May 24, 2024 12:00 AM</td>
+        <td>May 31, 2024 5:00 AM</td>
+      </tr>
+    </table>
+  </div>
+  <hr/>
+
+
+</body>
+</html>
