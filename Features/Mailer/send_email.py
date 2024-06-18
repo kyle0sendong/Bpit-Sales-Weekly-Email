@@ -4,6 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
 from dotenv import load_dotenv
+from Utils.dates import get_date_today, get_last_week_date, convert_month_day_string
 
 load_dotenv()
 
@@ -16,10 +17,14 @@ mail_port = os.getenv("MAIL_PORT")
 def send_mail(data, receiver_mail):
 
     try:
+
+        subject = (f'Weekly Status Report ({convert_month_day_string(get_last_week_date())}) - '
+                   f'({convert_month_day_string(get_date_today())})')
+
         msg = MIMEMultipart()
         msg['From'] = sender_email
         msg['To'] = receiver_mail
-        msg['Subject'] = 'Test1'
+        msg['Subject'] = subject
 
         env = jinja2.Environment(loader=jinja2.FileSystemLoader('Features/Mailer/templates'))
         template = env.get_template('template_outlook_v2_no_parameters.html')
