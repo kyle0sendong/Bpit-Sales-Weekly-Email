@@ -34,22 +34,15 @@ def get_current_status(cursor, station_name):
 
 
 def get_days_online(cursor, station_name):
-    customer_data = get_date_range_data(cursor, station_name, "2021-8-01", "2021-08-27 16:00:00.000")
+
     date_last_week_from_now = get_last_week_date()
     date_today = get_date_today()
 
-    # For test cases only
-    test1 = date(2021, 1, 1)
-    test2 = test1 - timedelta(days=7)
-
     online_stations_counter = 0
-    while test2 < test1:
-
-        data = get_custom_query(cursor, f"SELECT * FROM {station_name} WHERE Date_Time = '{test1}'")
-
+    while date_last_week_from_now < date_today:
+        data = get_custom_query(cursor, f"SELECT * FROM {station_name} WHERE Date_Time = '{date_today}'")
         if data:
             online_stations_counter = online_stations_counter + 1
-
-        test1 = test1 - timedelta(days=1)
+        date_today = date_today - timedelta(days=1)
 
     return online_stations_counter

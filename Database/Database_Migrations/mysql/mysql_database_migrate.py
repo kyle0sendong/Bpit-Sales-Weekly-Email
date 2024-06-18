@@ -5,28 +5,35 @@ from tables.customer_table import create_customer_table
 from tables.arm_table import create_arm_table
 from tables.sales_table import create_sales_table
 
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+driver = os.getenv("ODBC_DRIVER_MYSQL")
+server = os.getenv("SERVER3_MYSQL_LOCALHOST_NAME")
+user = os.getenv("SERVER3_MYSQL_LOCALHOST_USERNAME")
+password = os.getenv("SERVER3_MYSQL_LOCALHOST_PASSWORD")
+database_name = os.getenv("LOCAL_MYSQL_DATABASE")
+
 
 def connection():
-    driver = 'MySQL ODBC 8.1 ANSI Driver'
-    server = '127.0.0.1'
-    database = 'Sales_Mailer'
-    user = 'root'
-    password = ''
 
     return pyodbc.connect(f'DRIVER={driver};'
-                                f'SERVER={server};'
-                                f'DATABASE={database};'
-                                f'UID={user};'
-                                f'PWD={password};'
-                                f'charset=utf8',
-                                autocommit=True)
+                          f'SERVER={server};'
+                          f'DATABASE={database_name};'
+                          f'UID={user};'
+                          f'PWD={password};'
+                          f'charset=utf8',
+                          autocommit=True)
 
 
 def database_migrate():
-    create_database()
+    create_database(driver, server, user, password, database_name)
     create_arm_table(connection())
     create_sales_table(connection())
     create_customer_table(connection())
+    print("Finished migrating")
 
 
 database_migrate()

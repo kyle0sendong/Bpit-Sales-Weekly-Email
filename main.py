@@ -1,4 +1,4 @@
-from Database.connect import get_cursor, get_cursor_localhost_mssql
+from Database.connect import get_cursor, get_cursor_localhost_mysql
 from Database.fetch import get_all_data, get_custom_query
 from Features.Data_Processing.get_station_status import get_current_status, get_days_online
 from Utils.dates import get_last_week_date, get_date_today, convert_datetime_string, convert_date_string
@@ -12,8 +12,11 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-local_server_name = os.getenv("LOCAL_MSSQL")
-local_database_name = os.getenv("LOCAL_MSSQL_DATABASE")
+mysql_driver = os.getenv("ODBC_DRIVER_MYSQL")
+localhost_server_name = os.getenv("SERVER3_MYSQL_LOCALHOST_NAME")
+localhost_username = os.getenv("SERVER3_MYSQL_LOCALHOST_USERNAME")
+localhost_password = os.getenv("SERVER3_MYSQL_LOCALHOST_PASSWORD")
+localhost_database = os.getenv("local_mysql_database")
 
 
 def get_sales_customer_index(customers, sales_id):
@@ -36,11 +39,14 @@ def main():
     data_dictionary = []
 
     localhost = {
-        'ServerName': local_server_name,
-        'DatabaseName': local_database_name
+        'Driver': mysql_driver,
+        'ServerName': localhost_server_name,
+        'DatabaseName': localhost_database,
+        'Username': localhost_username,
+        'Password': localhost_password
     }
 
-    localhost_cursor = get_cursor_localhost_mssql(localhost)
+    localhost_cursor = get_cursor_localhost_mysql(localhost)
     sales_list = get_all_data(localhost_cursor, 'Sales')
     arms = get_all_data(localhost_cursor, 'Arm')
 
@@ -64,7 +70,7 @@ def main():
         for arm in sales_arm:
 
             arm_credential = get_arm_credential(arms, arm.ArmId)
-            cursor = get_cursor(arm_credential)
+            cursor = get_cursor(arm_credential, mysql_driver)
 
             arm_dict = {
                 "arm_name": arm_credential.DatabaseName,
@@ -97,6 +103,7 @@ def main():
             mailer_data_dict["report"].append(arm_dict)
 
         response = send_mail(mailer_data_dict, sales.Email)
+        print(response)
         data_dictionary.append(mailer_data_dict)
         time.sleep(1)
 

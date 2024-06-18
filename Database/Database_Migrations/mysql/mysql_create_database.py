@@ -1,11 +1,7 @@
 import pyodbc
 
 
-def create_database():
-    driver = 'MySQL ODBC 8.1 ANSI Driver'
-    server = '127.0.0.1'
-    user = 'root'
-    password = ''
+def create_database(driver, server, user, password, database_name):
 
     try:
         connection = pyodbc.connect(f'DRIVER={driver};'
@@ -14,7 +10,6 @@ def create_database():
                                     f'PWD={password}')
 
         cursor = connection.cursor()
-        database_name = "Sales_Mailer"
 
         collation = "utf8mb4_unicode_ci"
         cursor.execute(f"CREATE DATABASE {database_name} "
