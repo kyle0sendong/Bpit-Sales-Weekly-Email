@@ -27,7 +27,7 @@ def send_mail(data, receiver_mail):
         msg['Subject'] = subject
 
         env = jinja2.Environment(loader=jinja2.FileSystemLoader('Features/Mailer/templates'))
-        template = env.get_template('template_outlook_v2_no_parameters.html')
+        template = env.get_template('template_outlook_v3.html')
         rendered_html = template.render(data=data)
         html_body = MIMEText(rendered_html, 'html')
         msg.attach(html_body)

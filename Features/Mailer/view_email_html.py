@@ -31,7 +31,7 @@ def view_mail():
     with open("../../Data/mailer_data.json", "r") as f:
         json_data = json.load(f)
 
-    rendered_html = flask.render_template('template_outlook_v2_no_parameters.html', data=json_data[0])
+    rendered_html = flask.render_template('template_outlook_v3.html', data=json_data[0])
     return rendered_html
 
 
@@ -41,7 +41,7 @@ def send_mail():
         json_data = json.load(f)
 
     env = jinja2.Environment(loader=jinja2.FileSystemLoader('templates'))
-    template = env.get_template("template_outlook_v2_no_parameters.html")
+    template = env.get_template("template_outlook_v3.html")
     rendered_html = template.render(data=json_data[0])
     msg = Message(
         subject="Test mail",
