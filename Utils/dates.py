@@ -19,3 +19,8 @@ def convert_datetime_string(datetime):
 def convert_date_string(datetime):
     date_format = "%B %d, %Y"
     return datetime.strftime(date_format)
+
+
+def convert_month_day_string(datetime):
+    date_format = "%B %d"
+    return datetime.strftime(date_format)
