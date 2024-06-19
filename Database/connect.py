@@ -1,4 +1,13 @@
 import pyodbc
+from Logs.logger import logger
+
+
+def create_log(level, message):
+    execution_logger = logger('database_log',
+                              './Logs/db.log',
+                              '%(levelname)s. %(message)s %(asctime)s')
+
+    execution_logger.write_log(level=level, message=message)
 
 
 def get_cursor(credentials, driver='ODBC Driver 17 for SQL Server'):
@@ -13,8 +22,7 @@ def get_cursor(credentials, driver='ODBC Driver 17 for SQL Server'):
         return connection.cursor()
 
     except Exception as e:
-        print(e)
-        return None
+        create_log(40, f"Error connecting to database. Error: {e}")
 
 
 def get_cursor_localhost_mssql(credentials, driver='ODBC Driver 17 for SQL Server'):
@@ -28,8 +36,7 @@ def get_cursor_localhost_mssql(credentials, driver='ODBC Driver 17 for SQL Serve
         return connection.cursor()
 
     except Exception as e:
-        print(e)
-        return None
+        create_log(40, f"Error connecting to database. Error: {e}")
 
 
 def get_cursor_localhost_mysql(credentials):
@@ -44,5 +51,4 @@ def get_cursor_localhost_mysql(credentials):
         return connection.cursor()
 
     except Exception as e:
-        print(e)
-        return None
+        create_log(40, f"Error connecting to database. Error: {e}")
