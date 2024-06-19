@@ -8,7 +8,7 @@ from Features.Mailer.send_email import send_mail
 import time
 import os
 from dotenv import load_dotenv
-
+from Logs.logger import logger
 
 load_dotenv()
 
@@ -32,6 +32,24 @@ def get_arm_credential(arms, arm_id):
     for arm in arms:
         if arm.Id == arm_id:
             return arm
+
+
+def write_to_json(data):
+    with open("data/mailer_data.json", "w") as outfile:
+        json.dump(data, outfile)
+
+
+def create_log(response, data):
+    execution_logger = logger('execution_logs',
+                              './Logs/execution.log',
+                              '%(levelname)s. %(message)s %(asctime)s')
+
+    if response == {}:
+        message = f'Mail sent to {data['sales_email']}'
+        execution_logger.write_log(level=20, message=message)
+    else:
+        message = f'Mail not sent to {data['sales_email']}'
+        execution_logger.write_log(level=40, message=message)
 
 
 def main():
@@ -70,53 +88,53 @@ def main():
         for arm in sales_arm:
 
             arm_credential = get_arm_credential(arms, arm.ArmId)
-            cursor = get_cursor(arm_credential, mysql_driver)
-
             arm_dict = {
                 "arm_name": arm_credential.DatabaseName,
+                "region_name": arm_credential.RegionName,
                 "online": "",
                 "stations": []
             }
 
+            cursor = get_cursor(arm_credential, mysql_driver)
             stations_online_counter = 0
-            counter = 0
+            max_stations_counter = 0
             for customer in sales_customers:
 
                 if customer.ArmId == arm.ArmId:
 
+                    days_online = get_days_online(cursor, customer.TableName)
+
                     current_status_dictionary = get_current_status(cursor, customer.TableName)
+                    current_status_dictionary["days_online"] = f"{days_online}/7 days"
+                    current_status_dictionary["customer_name"] = f"{customer.CustomerName}"
                     current_status_dictionary["date_checked"] = convert_datetime_string(datetime.now())
 
-                    days_online = get_days_online(cursor, customer.TableName)
-                    current_status_dictionary["days_online"] = f"{days_online}/7 days"
-
+                    # put current status dictionary inside the "stations" in dictionary
                     arm_dict["stations"].append(current_status_dictionary)
 
                     if current_status_dictionary['current_status'] == 'Online':
                         stations_online_counter = stations_online_counter + 1
 
-                    counter = counter + 1
+                    max_stations_counter = max_stations_counter + 1
 
             cursor.close()
 
-            arm_dict["online"] = f"{stations_online_counter}/{counter}"
+            arm_dict["online"] = f"{stations_online_counter}/{max_stations_counter}"
+
             mailer_data_dict["report"].append(arm_dict)
 
-        response = send_mail(mailer_data_dict, sales.Email)
-        print(response)
+        sendmail_response = send_mail(mailer_data_dict, sales.Email)
+        create_log(sendmail_response, mailer_data_dict)
         data_dictionary.append(mailer_data_dict)
+
         time.sleep(1)
 
+    write_to_json(data_dictionary)
     localhost_cursor.close()
 
-    with open("data/mailer_data.json", "w") as outfile:
-        json.dump(data_dictionary, outfile)
+    return
 
 
-try:
-    if __name__ == "__main__":
-        main()
-        print("Finished sending mail")
+if __name__ == "__main__":
+    main()
 
-except Exception as e:
-    print(f"Error: {e}")
