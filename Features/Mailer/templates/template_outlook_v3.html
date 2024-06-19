@@ -78,7 +78,7 @@
         </tr>
         {% for arm_data in data.report %}
           <tr class="rows">
-            <td class="row-border-right"> {{arm_data.RegionName}}</td>
+            <td class="row-border-right"> {{arm_data.region_name}}</td>
             <td>{{arm_data.online}}</td>
           </tr>
         {% endfor %}
@@ -108,8 +108,8 @@
 
           {% for station in arm_data.stations %}
             <tr class="rows">
-              <td> {{arm_data.RegionName}}</td>
-              <td class="row-border-right"> {{station.CustomerName}} </td>
+              <td> {{arm_data.region_name}}</td>
+              <td class="row-border-right"> {{station.customer_name}} </td>
               <td>{{station.current_status}}</td>
               <td>{{station.days_online}}</td>
               <td>{{station.latest_data}}</td>
