@@ -1,14 +1,12 @@
 from Database.connect import get_cursor, get_cursor_localhost_mysql
 from Database.fetch import get_all_data, get_custom_query
-from Features.Data_Processing.get_station_status import get_current_status, get_days_online
-from Utils.dates import get_last_week_date, get_date_today, convert_datetime_string, convert_date_string
-from datetime import datetime
 import json
 from Features.Mailer.send_email import send_mail
 import time
 import os
 from dotenv import load_dotenv
 from Logs.logger import logger
+from Constants.dictionaries import create_mailer_dictionary, create_arm_dictionary, create_current_status_dictionary
 
 load_dotenv()
 
@@ -53,7 +51,6 @@ def create_log(response, data):
 
 
 def main():
-
     data_dictionary = []
 
     localhost = {
@@ -68,64 +65,50 @@ def main():
     sales_list = get_all_data(localhost_cursor, 'Sales')
     arms = get_all_data(localhost_cursor, 'Arm')
 
+    # Process every sales personnel
     for sales in sales_list:
 
-        mailer_data_dict = {
-            "sales_firstname": f"{sales.FirstName}",
-            "sales_lastname": f"{sales.LastName}",
-            "sales_email": f"{sales.Email}",
-            "start_date": f"{convert_date_string(get_last_week_date())}",
-            "end_date": f"{convert_date_string(get_date_today())}",
-            "report": []
-        }
+        mailer_data_dict = create_mailer_dictionary(sales)
 
-        sales_customers = get_custom_query(localhost_cursor,
-                                           f'SELECT * FROM Customer '
-                                           f'WHERE SalesId = {sales.Id}')
-        sales_arm = get_custom_query(localhost_cursor, f"SELECT DISTINCT(ArmId) FROM Customer "
-                                                       f"WHERE SalesId = {sales.Id}")
+        customer_arm = get_custom_query(localhost_cursor, f"SELECT DISTINCT(ArmId) FROM Customer "
+                                                          f"WHERE SalesId = {sales.Id}")
 
-        for arm in sales_arm:
+        customers = get_custom_query(localhost_cursor,
+                                     f'SELECT * FROM Customer '
+                                     f'WHERE SalesId = {sales.Id}')
+
+        # Process the data ARMs or EMB that a customer belongs to
+        for arm in customer_arm:
 
             arm_credential = get_arm_credential(arms, arm.ArmId)
-            arm_dict = {
-                "arm_name": arm_credential.DatabaseName,
-                "region_name": arm_credential.RegionName,
-                "online": "",
-                "stations": []
-            }
-
+            arm_dict = create_arm_dictionary(arm_credential)
             cursor = get_cursor(arm_credential, mysql_driver)
+
+            # Process the data for each customer/station
             stations_online_counter = 0
             max_stations_counter = 0
-            for customer in sales_customers:
+            for customer in customers:
 
-                if customer.ArmId == arm.ArmId:
+                if customer.ArmId != arm.ArmId:
+                    continue
 
-                    days_online = get_days_online(cursor, customer.TableName)
+                # put current status dictionary inside the "stations" in dictionary
+                current_status_dictionary = create_current_status_dictionary(cursor, customer)
+                arm_dict["stations"].append(current_status_dictionary)
 
-                    current_status_dictionary = get_current_status(cursor, customer.TableName)
-                    current_status_dictionary["days_online"] = f"{days_online}/7 days"
-                    current_status_dictionary["customer_name"] = f"{customer.CustomerName}"
-                    current_status_dictionary["date_checked"] = convert_datetime_string(datetime.now())
+                # Counters for tracking online stations
+                if current_status_dictionary['current_status'] == 'Online':
+                    stations_online_counter = stations_online_counter + 1
+                max_stations_counter = max_stations_counter + 1
 
-                    # put current status dictionary inside the "stations" in dictionary
-                    arm_dict["stations"].append(current_status_dictionary)
-
-                    if current_status_dictionary['current_status'] == 'Online':
-                        stations_online_counter = stations_online_counter + 1
-
-                    max_stations_counter = max_stations_counter + 1
+            arm_dict["online"] = f"{stations_online_counter}/{max_stations_counter}"
+            mailer_data_dict["report"].append(arm_dict)
 
             cursor.close()
 
-            arm_dict["online"] = f"{stations_online_counter}/{max_stations_counter}"
-
-            mailer_data_dict["report"].append(arm_dict)
-
+        data_dictionary.append(mailer_data_dict)
         sendmail_response = send_mail(mailer_data_dict, sales.Email)
         create_log(sendmail_response, mailer_data_dict)
-        data_dictionary.append(mailer_data_dict)
 
         time.sleep(1)
 
@@ -137,4 +120,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
