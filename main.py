@@ -1,6 +1,5 @@
 from Database.DatabaseConnection import DatabaseConnection
 from Database.DatabaseModel import DatabaseModel
-import json
 from Features.Mailer.send_email import send_mail
 import time
 from Error_Handler.Logger import Logger
@@ -8,6 +7,8 @@ from Features.Data_Processing.dictionaries import create_mailer_dictionary, crea
     create_current_status_dictionary
 from dotenv import load_dotenv
 import os
+from Features.Data_Processing.StationStatusReporter import StationStatusReporter
+
 
 load_dotenv()
 
@@ -66,7 +67,6 @@ def main():
 
         customer_arm = localhost_model.get_data_custom_query(f"SELECT DISTINCT(ArmId) FROM Customer "
                                                              f"WHERE SalesId = {sales.Id}")
-
         customers = localhost_model.get_data_custom_query(f'SELECT * FROM Customer '
                                                           f'WHERE SalesId = {sales.Id}')
 
@@ -76,7 +76,6 @@ def main():
             arm_credential = get_arm_credential(arm_list, arm.ArmId)
             arm_dict = create_arm_dictionary(arm_credential)
             arm_driver = localhost_model.get_data('Driver', arm.ArmId)
-
             arm_connection = DatabaseConnection(
                 driver=arm_driver.DriverName,
                 server=arm_credential.ServerName,
@@ -91,12 +90,15 @@ def main():
             stations_online_counter = 0
             max_stations_counter = 0
             for customer in customers:
-
                 if customer.ArmId != arm.ArmId:
                     continue
 
-                # put current status dictionary inside the "stations" in dictionary
-                current_status_dictionary = create_current_status_dictionary(arm_database_model, customer)
+                station_status_reporter = StationStatusReporter(arm_database_model,
+                                                                customer.TableName,
+                                                                customer.CustomerName)
+
+                # put current status dictionary inside the ARM "stations" dictionary
+                current_status_dictionary = create_current_status_dictionary(station_status_reporter)
                 arm_dict["stations"].append(current_status_dictionary)
 
                 # Counters for tracking online stations
