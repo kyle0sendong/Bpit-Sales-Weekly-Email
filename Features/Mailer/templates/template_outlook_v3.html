@@ -99,9 +99,12 @@
           <th style="width: 20%">Region</th>
           <th style="width: 15%">Customer</th>
           <th>Current Status</th>
-          <th>Days Online</th>
           <th>Latest Data</th>
           <th>Date & Time Checked</th>
+          <th>Weekly Hours</th>
+          {% for daily_data in data.report.daily_hours %}
+            <th>{{daily_data.day}}</th>
+          {% endfor %}
         </tr>
 
         {% for arm_data in data.report %}
@@ -111,9 +114,13 @@
               <td> {{arm_data.region_name}}</td>
               <td class="row-border-right"> {{station.customer_name}} </td>
               <td>{{station.current_status}}</td>
-              <td>{{station.days_online}}</td>
               <td>{{station.latest_data}}</td>
-              <td>{{station.date_checked}}</td>
+              <td class="row-border-right">{{station.date_checked}}</td>
+
+              {% for daily_data in data.report.daily_hours %}
+                <td>{{daily_data.hours}}</td>
+              {% endfor %}
+
             </tr>
           {% endfor %}
 
