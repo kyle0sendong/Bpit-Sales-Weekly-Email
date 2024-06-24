@@ -47,3 +47,42 @@ def get_days_online(database_model, station_name):
         date_today = date_today - timedelta(days=1)
 
     return online_stations_counter
+
+
+def get_hours_online(database_model) -> dict:
+    hours_online = {
+        "days": [],
+        "hours_daily": [],
+        "hours_weekly": 0
+    }
+
+    date_now = date.today()
+    weekly_total_hours_online = 0
+
+    for i in range(7):
+
+        query = (f"SELECT Date_Time FROM data_table WHERE Date_Time <= '{date_now}'"
+                 f"AND Date_Time > '{date_now - timedelta(days=1)}' ")
+        data_list = database_model.get_data_custom_query(query)
+
+        # Append to list
+        hours_list = []
+        for data in data_list:
+            hour = data.Date_Time.strftime('%H')
+            hours_list.append(hour)
+
+        # Using set only takes unique elements
+        daily_hours_online = len(set(hours_list))
+
+        month_day = date_now.strftime('%b %d')
+        hours_online["days"].append(month_day)
+
+        daily_data = {month_day: daily_hours_online}
+        hours_online["hours_daily"].append(daily_data)
+
+        weekly_total_hours_online = weekly_total_hours_online + daily_hours_online
+        date_now = date_now - timedelta(days=1)
+
+    hours_online["hours_weekly"] = weekly_total_hours_online
+
+    return hours_online
