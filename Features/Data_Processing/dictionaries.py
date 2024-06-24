@@ -1,10 +1,8 @@
 from datetime import datetime
-
-from Features.Data_Processing.get_station_status import get_days_online, get_current_status
 from Utils.dates import convert_date_string, get_date_today, get_last_week_date, convert_datetime_string
 
 
-def create_mailer_dictionary(sales):
+def create_mailer_dictionary(sales) -> dict:
     mailer_data_dict = {
         "sales_firstname": f"{sales.FirstName}",
         "sales_lastname": f"{sales.LastName}",
@@ -16,16 +14,20 @@ def create_mailer_dictionary(sales):
     return mailer_data_dict
 
 
-def create_current_status_dictionary(database_model, customer):
-    days_online = get_days_online(database_model, customer.TableName)
-    current_status_dictionary = get_current_status(database_model, customer.TableName)
+def create_current_status_dictionary(station_status_reporter) -> dict:
+    days_online = station_status_reporter.get_days_online()
+    current_status_dictionary = station_status_reporter.get_current_status()
     current_status_dictionary["days_online"] = f"{days_online}/7 days"
-    current_status_dictionary["customer_name"] = f"{customer.CustomerName}"
+    current_status_dictionary["customer_name"] = f"{station_status_reporter.customer_name}"
     current_status_dictionary["date_checked"] = convert_datetime_string(datetime.now())
+    # Get all hours online
+    hours_online_dict = station_status_reporter.get_daily_weekly_hours_online()
+    current_status_dictionary["hours_online"] = hours_online_dict
+
     return current_status_dictionary
 
 
-def create_arm_dictionary(arm_credential):
+def create_arm_dictionary(arm_credential) -> dict:
     arm_dict = {
         "arm_name": arm_credential.DatabaseName,
         "region_name": arm_credential.RegionName,
@@ -33,5 +35,3 @@ def create_arm_dictionary(arm_credential):
         "stations": []
     }
     return arm_dict
-
-
