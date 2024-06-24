@@ -1,12 +1,13 @@
-from Database.connect import get_cursor, get_cursor_localhost_mysql
-from Database.fetch import get_all_data, get_custom_query
+from Database.DatabaseConnection import DatabaseConnection
+from Database.DatabaseModel import DatabaseModel
 import json
 from Features.Mailer.send_email import send_mail
 import time
-import os
+from Error_Handler.Logger import Logger
+from Features.Data_Processing.dictionaries import create_mailer_dictionary, create_arm_dictionary, \
+    create_current_status_dictionary
 from dotenv import load_dotenv
-from Logs.logger import logger
-from Constants.dictionaries import create_mailer_dictionary, create_arm_dictionary, create_current_status_dictionary
+import os
 
 load_dotenv()
 
@@ -32,57 +33,59 @@ def get_arm_credential(arms, arm_id):
             return arm
 
 
-def write_to_json(data):
-    with open("data/mailer_data.json", "w") as outfile:
-        json.dump(data, outfile)
-
-
 def create_log(response, data):
-    execution_logger = logger('execution_logs',
+    execution_logger = Logger('execution_logs',
                               './Logs/execution.log',
-                              '%(levelname)s. %(message)s %(asctime)s')
+                              '%(asctime)s. %(levelname)s. %(message)s ')
 
     if response == {}:
         message = f'Mail sent to {data['sales_email']}'
         execution_logger.write_log(level=20, message=message)
     else:
         message = f'Mail not sent to {data['sales_email']}'
-        execution_logger.write_log(level=40, message=message)
+        execution_logger.write_log(level=20, message=message)
 
 
 def main():
     data_dictionary = []
 
-    localhost = {
-        'Driver': mysql_driver,
-        'ServerName': localhost_server_name,
-        'DatabaseName': localhost_database,
-        'Username': localhost_username,
-        'Password': localhost_password
-    }
+    localhost_connection = DatabaseConnection(driver=mysql_driver,
+                                              server=localhost_server_name,
+                                              database=localhost_database,
+                                              username=localhost_username,
+                                              password=localhost_password)
+    localhost_model = DatabaseModel(localhost_connection.get_cursor())
 
-    localhost_cursor = get_cursor_localhost_mysql(localhost)
-    sales_list = get_all_data(localhost_cursor, 'Sales')
-    arms = get_all_data(localhost_cursor, 'Arm')
+    sales_list = localhost_model.get_all_data('Sales')
+    arm_list = localhost_model.get_all_data('Arm')
 
     # Process every sales personnel
     for sales in sales_list:
 
         mailer_data_dict = create_mailer_dictionary(sales)
 
-        customer_arm = get_custom_query(localhost_cursor, f"SELECT DISTINCT(ArmId) FROM Customer "
-                                                          f"WHERE SalesId = {sales.Id}")
+        customer_arm = localhost_model.get_data_custom_query(f"SELECT DISTINCT(ArmId) FROM Customer "
+                                                             f"WHERE SalesId = {sales.Id}")
 
-        customers = get_custom_query(localhost_cursor,
-                                     f'SELECT * FROM Customer '
-                                     f'WHERE SalesId = {sales.Id}')
+        customers = localhost_model.get_data_custom_query(f'SELECT * FROM Customer '
+                                                          f'WHERE SalesId = {sales.Id}')
 
         # Process the data ARMs or EMB that a customer belongs to
         for arm in customer_arm:
 
-            arm_credential = get_arm_credential(arms, arm.ArmId)
+            arm_credential = get_arm_credential(arm_list, arm.ArmId)
             arm_dict = create_arm_dictionary(arm_credential)
-            cursor = get_cursor(arm_credential, mysql_driver)
+            arm_driver = localhost_model.get_data('Driver', arm.ArmId)
+
+            arm_connection = DatabaseConnection(
+                driver=arm_driver.DriverName,
+                server=arm_credential.ServerName,
+                database=arm_credential.DatabaseName,
+                username=arm_credential.Username,
+                password=arm_credential.Password
+            )
+            arm_cursor = arm_connection.get_cursor()
+            arm_database_model = DatabaseModel(arm_cursor)
 
             # Process the data for each customer/station
             stations_online_counter = 0
@@ -93,7 +96,7 @@ def main():
                     continue
 
                 # put current status dictionary inside the "stations" in dictionary
-                current_status_dictionary = create_current_status_dictionary(cursor, customer)
+                current_status_dictionary = create_current_status_dictionary(arm_database_model, customer)
                 arm_dict["stations"].append(current_status_dictionary)
 
                 # Counters for tracking online stations
@@ -104,7 +107,7 @@ def main():
             arm_dict["online"] = f"{stations_online_counter}/{max_stations_counter}"
             mailer_data_dict["report"].append(arm_dict)
 
-            cursor.close()
+            arm_connection.close_cursor()
 
         data_dictionary.append(mailer_data_dict)
         sendmail_response = send_mail(mailer_data_dict, sales.Email)
@@ -112,8 +115,7 @@ def main():
 
         time.sleep(1)
 
-    write_to_json(data_dictionary)
-    localhost_cursor.close()
+    localhost_connection.close_cursor()
 
     return
 

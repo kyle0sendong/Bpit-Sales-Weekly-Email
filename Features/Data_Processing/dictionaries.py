@@ -16,9 +16,9 @@ def create_mailer_dictionary(sales):
     return mailer_data_dict
 
 
-def create_current_status_dictionary(cursor, customer):
-    days_online = get_days_online(cursor, customer.TableName)
-    current_status_dictionary = get_current_status(cursor, customer.TableName)
+def create_current_status_dictionary(database_model, customer):
+    days_online = get_days_online(database_model, customer.TableName)
+    current_status_dictionary = get_current_status(database_model, customer.TableName)
     current_status_dictionary["days_online"] = f"{days_online}/7 days"
     current_status_dictionary["customer_name"] = f"{customer.CustomerName}"
     current_status_dictionary["date_checked"] = convert_datetime_string(datetime.now())

@@ -1,11 +1,11 @@
 import smtplib
 import jinja2
+import os
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-import os
 from dotenv import load_dotenv
 from Utils.dates import get_date_today, get_last_week_date, convert_month_day_string
-from Logs.logger import logger
+from Error_Handler.Logger import Logger
 
 
 load_dotenv()
@@ -17,16 +17,16 @@ mail_port = os.getenv("MAIL_PORT")
 
 
 def create_log(level, message):
-    execution_logger = logger('mail_log',
+    execution_logger = Logger('mail_log',
                               './Logs/mail.log',
-                              '%(levelname)s. %(message)s %(asctime)s')
+                              '%(asctime)s. %(levelname)s. %(message)s')
 
     execution_logger.write_log(level=level, message=message)
 
 
 def send_mail(data, receiver_mail):
 
-    subject = (f'Weekly Status Report ({convert_month_day_string(get_last_week_date())}) - '
+    subject = (f'Weekly Station Status Report ({convert_month_day_string(get_last_week_date())}) - '
                f'({convert_month_day_string(get_date_today())})')
 
     msg = MIMEMultipart()
@@ -50,5 +50,5 @@ def send_mail(data, receiver_mail):
             response = server.sendmail(msg['From'], msg['To'], msg.as_string())
             return response
     except Exception as e:
-        create_log(40, f'{e}')
+        create_log(40, f'An exception caught. {e}')
 

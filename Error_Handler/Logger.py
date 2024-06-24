@@ -1,7 +1,7 @@
 import logging
 
 
-class logger:
+class Logger:
     def __init__(self, name, filename, formatter):
         self.logger = logging.getLogger(name)
         self.fileHandler = logging.FileHandler(filename)

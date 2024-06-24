@@ -12,9 +12,17 @@ def create_arm_table(connection):
                 f"ServerName VARCHAR(64) NOT NULL, "
                 f"DatabaseName VARCHAR(64) NOT NULL, "
                 f"RegionName VARCHAR(64) NOT NULL, "
+                f"DriverId INT(5) NOT NULL, "
                 f"Username VARCHAR(32) NOT NULL, "
                 f"Password VARCHAR(64) NOT NULL"
                 f");"
+            )
+
+            cursor.execute(
+                f"ALTER TABLE {table_name} "
+                f"ADD FOREIGN KEY (DriverId) "
+                f"REFERENCES Driver(Id) "
+                f"ON DELETE CASCADE ON UPDATE CASCADE;"
             )
 
             cursor.close()
