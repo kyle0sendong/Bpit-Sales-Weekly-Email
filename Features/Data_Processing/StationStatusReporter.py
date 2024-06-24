@@ -82,14 +82,13 @@ class StationStatusReporter:
 
             # Using set only takes unique elements
             daily_hours_online = len(set(hours_list))
-
             # Format, used for column names
             month_day = date_now.strftime('%b %d')
-            hours_online["days"].append(month_day)
-
             # Total daily hours
-            daily_data = {month_day: daily_hours_online}
-            hours_online["daily_hours"].append(daily_data)
+            hours_online["daily_hours"].append(
+                {"hours": daily_hours_online,
+                 "day": month_day}
+            )
 
             weekly_total_hours_online = weekly_total_hours_online + daily_hours_online
             date_now = date_now - timedelta(days=1)
