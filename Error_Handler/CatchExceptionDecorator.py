@@ -3,7 +3,7 @@ from Error_Handler.Logger import Logger
 
 def create_log(level, message):
     execution_logger = Logger('error_logs',
-                              '../Logs/error.log',
+                              './Logs/error.log',
                               '%(asctime)s %(levelname)s. %(message)s')
 
     execution_logger.write_log(level=level, message=message)
