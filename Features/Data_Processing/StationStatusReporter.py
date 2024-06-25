@@ -37,22 +37,6 @@ class StationStatusReporter:
 
         return station_dictionary
 
-    def get_days_online(self) -> int:
-
-        date_last_week_from_now = get_last_week_date()
-        date_today = get_date_today()
-
-        online_stations_counter = 0
-        while date_last_week_from_now < date_today:
-            data = self.database_model.get_data_custom_query(
-                f"SELECT * FROM {self.station_name} WHERE Date_Time = '{date_today}'"
-            )
-            if data:
-                online_stations_counter = online_stations_counter + 1
-            date_today = date_today - timedelta(days=1)
-
-        return online_stations_counter
-
     def get_daily_weekly_hours_online(self) -> dict:
         hours_online = {
             "daily_hours": [],
@@ -95,3 +79,20 @@ class StationStatusReporter:
         hours_online["weekly_hours"] = weekly_total_hours_online
 
         return hours_online
+
+
+    # def get_days_online(self) -> int:
+    #
+    #     date_last_week_from_now = get_last_week_date()
+    #     date_today = get_date_today()
+    #
+    #     online_stations_counter = 0
+    #     while date_last_week_from_now < date_today:
+    #         data = self.database_model.get_data_custom_query(
+    #             f"SELECT * FROM {self.station_name} WHERE Date_Time = '{date_today}'"
+    #         )
+    #         if data:
+    #             online_stations_counter = online_stations_counter + 1
+    #         date_today = date_today - timedelta(days=1)
+    #
+    #     return online_stations_counter

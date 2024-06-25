@@ -27,9 +27,7 @@ def create_arm_dictionary(arm_credential) -> dict:
 
 
 def create_current_status_dictionary(station_status_reporter) -> dict:
-    days_online = station_status_reporter.get_days_online()
     current_status_dictionary = station_status_reporter.get_current_status()
-    current_status_dictionary["days_online"] = f"{days_online}/7 days"
     current_status_dictionary["customer_name"] = f"{station_status_reporter.customer_name}"
     current_status_dictionary["date_checked"] = convert_datetime_string(datetime.now())
     # Get all hours online
@@ -38,3 +36,6 @@ def create_current_status_dictionary(station_status_reporter) -> dict:
     current_status_dictionary["daily_hours"] = hours_online_dict["daily_hours"]
 
     return current_status_dictionary
+
+    # days_online = station_status_reporter.get_days_online()
+    # current_status_dictionary["days_online"] = f"{days_online}/7 days"
