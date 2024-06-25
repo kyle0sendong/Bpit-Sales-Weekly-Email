@@ -55,7 +55,6 @@ class StationStatusReporter:
 
     def get_daily_weekly_hours_online(self) -> dict:
         hours_online = {
-            "days": [],
             "daily_hours": [],
             "weekly_hours": 0
         }
