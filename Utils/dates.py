@@ -24,3 +24,13 @@ def convert_date_string(datetime):
 def convert_month_day_string(datetime):
     date_format = "%B %d"
     return datetime.strftime(date_format)
+
+
+def get_7_day_list() -> list:
+    date_now = date.today()-timedelta(days=1)
+    date_list = []
+    for i in range(7):
+        date_list.append(date_now.strftime('%b %d'))
+        date_now = date_now - timedelta(days=1)
+
+    return date_list

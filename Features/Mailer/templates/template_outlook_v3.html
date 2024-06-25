@@ -51,7 +51,7 @@
       padding: 1vh;
     }
       .station table {
-        width: 80%;
+        width: 100%;
       }
 
   </style>
@@ -96,12 +96,20 @@
 
       <table>
         <tr class="rows">
-          <th style="width: 20%">Region</th>
+          <th colspan="2"></th>
+          <th colspan="4" class="row-border-right"></th>
+          <th colspan="7"> HOURS ONLINE</th>
+        </tr>
+        <tr class="rows">
+          <th style="width: 10%">Region</th>
           <th style="width: 15%">Customer</th>
-          <th>Current Status</th>
-          <th>Days Online</th>
-          <th>Latest Data</th>
-          <th>Date & Time Checked</th>
+          <th style="width: 10%">Current Status</th>
+          <th style="width: 14%">Most Recent Data</th>
+          <th style="width: 14%">Date & Time Checked</th>
+          <th style="width: 8%" class="row-border-right">Total Hours Online</th>
+          {% for weekly_day in data.weekly_days %}
+            <th style="width: 4%">{{weekly_day}}</th>
+          {% endfor %}
         </tr>
 
         {% for arm_data in data.report %}
@@ -111,9 +119,13 @@
               <td> {{arm_data.region_name}}</td>
               <td class="row-border-right"> {{station.customer_name}} </td>
               <td>{{station.current_status}}</td>
-              <td>{{station.days_online}}</td>
               <td>{{station.latest_data}}</td>
-              <td>{{station.date_checked}}</td>
+              <td class="row-border-right">{{station.date_checked}}</td>
+              <td class="row-border-right">{{station.weekly_hours}}</td>
+              {% for hours_online in station.daily_hours %}
+                <td>{{hours_online.hours}}</td>
+              {% endfor %}
+
             </tr>
           {% endfor %}
 
