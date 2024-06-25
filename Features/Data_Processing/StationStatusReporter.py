@@ -37,6 +37,22 @@ class StationStatusReporter:
 
         return station_dictionary
 
+    def get_days_online(self) -> int:
+
+        date_last_week_from_now = get_last_week_date()
+        date_today = get_date_today()
+
+        online_stations_counter = 0
+        while date_last_week_from_now < date_today:
+            data = self.database_model.get_data_custom_query(
+                f"SELECT * FROM {self.station_name} WHERE Date_Time = '{date_today}'"
+            )
+            if data:
+                online_stations_counter = online_stations_counter + 1
+            date_today = date_today - timedelta(days=1)
+
+        return online_stations_counter
+
     def get_daily_weekly_hours_online(self) -> dict:
         hours_online = {
             "daily_hours": [],
@@ -48,8 +64,8 @@ class StationStatusReporter:
 
         for i in range(7):
 
-            query = (f"SELECT Date_Time FROM {self.station_name} WHERE Date_Time <= '{date_now}'"
-                     f"AND Date_Time > '{date_now - timedelta(days=1)}' ")
+            query = (f"SELECT Date_Time FROM {self.station_name} WHERE Date_Time < '{date_now}'"
+                     f"AND Date_Time >= '{date_now - timedelta(days=1)}' ")
             data_list = self.database_model.get_data_custom_query(query)
 
             # Create list for all data gathered
@@ -57,14 +73,17 @@ class StationStatusReporter:
             hours_list = []
             previous_hour = None
             for data in data_list:
+                hour = data.Date_Time.strftime('%H')
                 if previous_hour is not None:
-                    hour = data.Date_Time.strftime('%H')
                     if hour != previous_hour:
                         hours_list.append(hour)
-                previous_hour = data
+                else:
+                    hours_list.append(hour)
+                previous_hour = hour
 
             # Using set only takes unique elements
             daily_hours_online = len(set(hours_list))
+
             # Format, used for column names
             month_day = date_now.strftime('%b %d')
             # Total daily hours
@@ -79,20 +98,3 @@ class StationStatusReporter:
         hours_online["weekly_hours"] = weekly_total_hours_online
 
         return hours_online
-
-
-    # def get_days_online(self) -> int:
-    #
-    #     date_last_week_from_now = get_last_week_date()
-    #     date_today = get_date_today()
-    #
-    #     online_stations_counter = 0
-    #     while date_last_week_from_now < date_today:
-    #         data = self.database_model.get_data_custom_query(
-    #             f"SELECT * FROM {self.station_name} WHERE Date_Time = '{date_today}'"
-    #         )
-    #         if data:
-    #             online_stations_counter = online_stations_counter + 1
-    #         date_today = date_today - timedelta(days=1)
-    #
-    #     return online_stations_counter
