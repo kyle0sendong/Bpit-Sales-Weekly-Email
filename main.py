@@ -34,17 +34,14 @@ def get_arm_credential(arms, arm_id):
             return arm
 
 
-def create_log(response, data):
-    execution_logger = Logger('execution_logs',
-                              './Logs/execution.log',
-                              '%(asctime)s. %(levelname)s. %(message)s ')
+def create_log(logger, response, data):
 
     if response == {}:
         message = f'Mail sent to {data['sales_email']}'
-        execution_logger.write_log(level=20, message=message)
+        logger.write_log(level=20, message=message)
     else:
         message = f'Mail not sent to {data['sales_email']}'
-        execution_logger.write_log(level=20, message=message)
+        logger.write_log(level=20, message=message)
 
 
 def main():
@@ -59,7 +56,9 @@ def main():
 
     sales_list = localhost_model.get_all_data('Sales')
     arm_list = localhost_model.get_all_data('Arm')
-
+    execution_logger = Logger('execution_logs',
+                              './Logs/execution.log',
+                              '%(asctime)s. %(levelname)s. %(message)s ')
     # Process every sales personnel
     for sales in sales_list:
 
@@ -113,7 +112,7 @@ def main():
 
         data_dictionary.append(mailer_data_dict)
         sendmail_response = send_mail(mailer_data_dict, sales.Email)
-        create_log(sendmail_response, mailer_data_dict)
+        create_log(execution_logger, sendmail_response, mailer_data_dict)
 
         time.sleep(1)
 

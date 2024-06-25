@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from Utils.dates import get_date_today, get_last_week_date, convert_month_day_string
 from Error_Handler.Logger import Logger
 
-
 load_dotenv()
 
 sender_email = os.getenv("SENDER_MAIL")
@@ -16,15 +15,10 @@ mail_server = os.getenv("MAIL_SERVER")
 mail_port = os.getenv("MAIL_PORT")
 
 
-def create_log(level, message):
-    execution_logger = Logger('mail_log',
-                              './Logs/mail.log',
-                              '%(asctime)s. %(levelname)s. %(message)s')
-
-    execution_logger.write_log(level=level, message=message)
-
-
 def send_mail(data, receiver_mail):
+    logger = Logger('mail_log',
+                    './Logs/mail.log',
+                    '%(asctime)s. %(levelname)s. %(message)s')
 
     subject = (f'Weekly Station Status Report ({convert_month_day_string(get_last_week_date())}) - '
                f'({convert_month_day_string(get_date_today())})')
@@ -50,5 +44,4 @@ def send_mail(data, receiver_mail):
             response = server.sendmail(msg['From'], msg['To'], msg.as_string())
             return response
     except Exception as e:
-        create_log(40, f'An exception caught. {e}')
-
+        logger.write_log(level=40, message=f'An exception caught. {e}')
