@@ -35,13 +35,13 @@ def send_mail(data, receiver_mail):
     msg.attach(html_body)
 
     smtp_server = mail_server
-    smtp_port = int(mail_port)
+    smtp_port = 465
 
     try:
-        with smtplib.SMTP(smtp_server, smtp_port) as server:
-            server.starttls()
-            server.login(sender_email, sender_password)
-            response = server.sendmail(msg['From'], msg['To'], msg.as_string())
+        with smtplib.SMTP_SSL(smtp_server, smtp_port) as connection:
+            # server.starttls()
+            connection.login(sender_email, sender_password)
+            response = connection.sendmail(msg['From'], msg['To'], msg.as_string())
             return response
     except Exception as e:
         logger.write_log(level=40, message=f'An exception caught. {e}')
