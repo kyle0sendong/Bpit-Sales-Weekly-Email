@@ -1,5 +1,7 @@
-import pyodbc
 from enum import Enum
+
+import pyodbc
+
 from Error_Handler.CatchExceptionDecorator import catch_exceptions
 
 
@@ -11,24 +13,25 @@ class DatabaseDriver(Enum):
 @catch_exceptions
 class DatabaseConnection:
 
-    cursor = None
-
-    def __init__(self, driver, server, username, password, database=None) -> None:
+    def __init__(self, driver, server, username, password, database) -> None:
         self.server: str = server
         self.database: str = database
         self.username: str = username
         self.password: str = password
         self.driver = driver
 
-    def get_cursor(self) -> pyodbc.Cursor:
+        self.connection = pyodbc.connect(f'DRIVER={self.driver};'
+                                         f'SERVER={self.server};'
+                                         f'DATABASE={self.database};'
+                                         f'UID={self.username};'
+                                         f'PWD={self.password}')
+        self.cursor = self.connection.cursor()
 
-        connection = pyodbc.connect(f'DRIVER={self.driver};'
-                                    f'SERVER={self.server};'
-                                    f'DATABASE={self.database};'
-                                    f'UID={self.username};'
-                                    f'PWD={self.password}')
-        self.cursor = connection.cursor()
-        return connection.cursor()
+    def get_cursor(self) -> pyodbc.Cursor:
+        return self.cursor
+
+    def close_connection(self) -> None:
+        self.connection.close()
 
     def close_cursor(self) -> None:
         self.cursor.close()
