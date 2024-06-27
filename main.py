@@ -1,14 +1,15 @@
+import os
+import time
+
+from dotenv import load_dotenv
+
 from Database.DatabaseConnection import DatabaseConnection
 from Database.DatabaseModel import DatabaseModel
-from Features.Mailer.send_email import send_mail
-import time
 from Error_Handler.Logger import Logger
+from Features.Data_Processing.StationStatusReporter import StationStatusReporter
 from Features.Data_Processing.dictionaries import create_mailer_dictionary, create_arm_dictionary, \
     create_current_status_dictionary
-from dotenv import load_dotenv
-import os
-from Features.Data_Processing.StationStatusReporter import StationStatusReporter
-
+from Features.Mailer.send_email import send_mail
 
 load_dotenv()
 
@@ -19,23 +20,7 @@ localhost_password = os.getenv("SERVER3_MYSQL_LOCALHOST_PASSWORD")
 localhost_database = os.getenv("local_mysql_database")
 
 
-def get_sales_customer_index(customers, sales_id):
-    customer_indices = []
-    for i in range(len(customers)):
-        if customers[i].SalesId == sales_id:
-            customer_indices.append(i)
-
-    return customer_indices
-
-
-def get_arm_credential(arms, arm_id):
-    for arm in arms:
-        if arm.Id == arm_id:
-            return arm
-
-
-def create_log(logger, response, data):
-
+def create_log(logger: Logger, response: dict, data: dict):
     if response == {}:
         message = f'Mail sent to {data['sales_email']}'
         logger.write_log(level=20, message=message)
@@ -58,41 +43,42 @@ def main():
     arm_list = localhost_model.get_all_data('Arm')
     execution_logger = Logger('execution_logs',
                               './Logs/execution.log',
-                              '%(asctime)s. %(levelname)s. %(message)s ')
+                              '%(asctime)s. %(levelname)s. %(message)s')
+
     # Process every sales personnel
     for sales in sales_list:
 
         mailer_data_dict = create_mailer_dictionary(sales)
 
-        customer_arm = localhost_model.get_data_custom_query(f"SELECT DISTINCT(ArmId) FROM Customer "
-                                                             f"WHERE SalesId = {sales.Id}")
-        customers = localhost_model.get_data_custom_query(f'SELECT * FROM Customer '
-                                                          f'WHERE SalesId = {sales.Id}')
+        customer_id_list = localhost_model.get_data_custom_query(f'SELECT CustomerId FROM Lookup_Sales_Customer '
+                                                                 f'WHERE SalesId = {sales.Id}')
 
-        # Process the data ARMs or EMB that a customer belongs to
-        for arm in customer_arm:
-
-            arm_credential = get_arm_credential(arm_list, arm.ArmId)
-            arm_dict = create_arm_dictionary(arm_credential)
-            arm_driver = localhost_model.get_data('Driver', arm.ArmId)
+        # check which region a customer belongs to
+        for arm in arm_list:
+            arm_driver = localhost_model.get_data('Driver', arm.DriverId)
             arm_connection = DatabaseConnection(
                 driver=arm_driver.DriverName,
-                server=arm_credential.ServerName,
-                database=arm_credential.DatabaseName,
-                username=arm_credential.Username,
-                password=arm_credential.Password
+                server=arm.ServerName,
+                database=arm.DatabaseName,
+                username=arm.Username,
+                password=arm.Password
             )
+            arm_dict = create_arm_dictionary(arm)
             arm_cursor = arm_connection.get_cursor()
-            arm_database_model = DatabaseModel(arm_cursor)
 
             # Process the data for each customer/station
             stations_online_counter = 0
             max_stations_counter = 0
-            for customer in customers:
-                if customer.ArmId != arm.ArmId:
+            for customer_id in customer_id_list:
+
+                customer = localhost_model.get_data_custom_query(f'SELECT * FROM Customer '
+                                                                 f'WHERE Id = {customer_id.CustomerId}')
+                customer = customer[0]
+
+                if customer.ArmId != arm.Id:
                     continue
 
-                station_status_reporter = StationStatusReporter(arm_database_model,
+                station_status_reporter = StationStatusReporter(DatabaseModel(arm_cursor),
                                                                 customer.TableName,
                                                                 customer.CustomerName)
 
@@ -101,14 +87,15 @@ def main():
                 arm_dict["stations"].append(current_status_dictionary)
 
                 # Counters for tracking online stations
+                max_stations_counter += 1
                 if current_status_dictionary['current_status'] == 'Online':
-                    stations_online_counter = stations_online_counter + 1
-                max_stations_counter = max_stations_counter + 1
+                    stations_online_counter += 1
 
             arm_dict["online"] = f"{stations_online_counter}/{max_stations_counter}"
             mailer_data_dict["report"].append(arm_dict)
 
             arm_connection.close_cursor()
+            arm_connection.close_connection()
 
         data_dictionary.append(mailer_data_dict)
         sendmail_response = send_mail(mailer_data_dict, sales.Email)
@@ -117,8 +104,7 @@ def main():
         time.sleep(1)
 
     localhost_connection.close_cursor()
-
-    return
+    localhost_connection.close_connection()
 
 
 if __name__ == "__main__":
