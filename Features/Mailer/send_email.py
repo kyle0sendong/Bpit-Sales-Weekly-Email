@@ -1,11 +1,13 @@
-import smtplib
-import jinja2
 import os
-from email.mime.text import MIMEText
+import smtplib
 from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
+import jinja2
 from dotenv import load_dotenv
-from Utils.dates import get_date_today, get_last_week_date, convert_month_day_string
+
 from Error_Handler.Logger import Logger
+from Utils.dates import get_date_today, get_last_week_date, convert_month_day_string
 
 load_dotenv()
 

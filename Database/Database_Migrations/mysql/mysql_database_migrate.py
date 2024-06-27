@@ -1,12 +1,13 @@
-import pyodbc
-
-from mysql_create_database import create_database
-from tables.customer_table import create_customer_table
-from tables.arm_table import create_arm_table
-from tables.sales_table import create_sales_table
-from tables.driver_table import create_driver_table
 import os
+
+import pyodbc
 from dotenv import load_dotenv
+
+from Database.Database_Migrations.mysql.database.mysql_create_database import create_database
+from tables.arm_table import create_arm_table
+from tables.customer_table import create_customer_table
+from tables.driver_table import create_driver_table
+from tables.sales_table import create_sales_table
 
 load_dotenv()
 
